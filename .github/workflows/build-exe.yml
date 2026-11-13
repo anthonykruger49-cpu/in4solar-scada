@@ -1,0 +1,34 @@
+name: Build Windows SCADA EXE
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows-exe:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pymodbus pyinstaller
+
+      - name: Compile EXE with PyInstaller
+        run: |
+          pyinstaller --onefile --add-data "poller.py;." --name "In4Solar_SCADA" server.py
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: In4Solar_SCADA-Windows
+          path: dist/In4Solar_SCADA.exe
